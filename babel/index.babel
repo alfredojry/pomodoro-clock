@@ -1,0 +1,168 @@
+// React
+
+class PomodoroClock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      breakLength: 5,
+      sessionLength: 25,
+      time: 1500,
+      start: false,
+      processID: 0,
+      session: true
+    }
+    this.handleReset = this.handleReset.bind(this);
+    this.breakDecrement = this.breakDecrement.bind(this);
+    this.breakIncrement = this.breakIncrement.bind(this);
+    this.sessionDecrement = this.sessionDecrement.bind(this);
+    this.sessionIncrement = this.sessionIncrement.bind(this);
+    this.handleStartStop = this.handleStartStop.bind(this);
+    this.startClock = this.startClock.bind(this);
+    this.stopClock = this.stopClock.bind(this);
+    this.countdown = this.countdown.bind(this);
+    this.altSessBre = this.altSessBre.bind(this);
+  }
+  
+  handleReset() {
+    let alarm = document.getElementById('beep');
+    this.setState({
+      breakLength: 5,
+      sessionLength: 25,
+      time: 1500,
+      start: false,
+      processID: 0,
+      session: true
+    });
+    clearInterval(this.state.processID);
+    alarm.pause();
+    alarm.currentTime = 0;
+  }
+  
+  breakDecrement() {
+    if (this.state.breakLength > 1) {
+      this.setState({
+        breakLength: this.state.breakLength - 1
+      });
+    }
+  }
+  
+  breakIncrement() {
+    if (this.state.breakLength < 60) {
+      this.setState({
+        breakLength: this.state.breakLength + 1
+      });
+    }
+  }
+  
+  sessionDecrement() {
+    if (this.state.sessionLength > 1 && this.state.time > 1) {
+      this.setState({
+        sessionLength: this.state.sessionLength - 1,
+        time: this.state.time - 60
+      });
+    }
+  }
+  
+  sessionIncrement() {
+    if (this.state.sessionLength < 60) {
+      this.setState({
+        sessionLength: this.state.sessionLength + 1,
+        time: this.state.time + 60
+      });
+    }
+  }
+  
+  startClock() {
+    this.setState({
+        start: !this.state.start,
+        processID: setInterval(this.countdown, 1000)
+      });
+  }
+  
+  stopClock() {
+    this.setState({
+      start: !this.state.start
+    })
+    clearInterval(this.state.processID);
+  }
+  
+  countdown() {
+    let alarm = document.getElementById('beep');
+    if (this.state.time > 0) {
+      this.setState({
+        time: this.state.time - 1
+      });
+    } else {
+      clearInterval(this.state.processID);
+      alarm.currentTime = 0;
+      alarm.play();
+      this.altSessBre();
+    }
+  }
+  
+  altSessBre() {
+    if (this.state.session) {
+      this.setState({
+        time: this.state.breakLength * 60,
+        session: false,
+        processID: setInterval(this.countdown, 1000)
+      });
+    } else {
+      this.setState({
+        time: this.state.sessionLength * 60,
+        session: true,
+        processID: setInterval(this.countdown, 1000)
+      });
+    }
+  }
+  
+  handleStartStop() {
+    if (!this.state.start) {
+      this.startClock();
+    } else {
+      this.stopClock();
+    }
+  }
+  
+  render() {
+    let min = Math.floor(this.state.time / 60);
+    let sec = this.state.time % 60;
+    const checkNum = num => num === 0 ? '00' : num < 10 ? '0' + num : num.toString(); 
+    let showTime = checkNum(min) + ':' + checkNum(sec);
+    
+    return (<div>
+        <div id='top-container'>
+          <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdx9_zMAoJ7xv-po_nmRO4noDN2E03gK2XHSzoV3-jvvGxywam' className='tomato' alt='tomato animated' />
+          <h2>Pomodoro Clock</h2>
+        </div>
+        <div id='label-container'>
+          <div id='break-label' className='length text'>Break Length
+            <div className='container-buttons'>
+              <button id='break-decrement' onClick={this.breakDecrement}><i className="fas fa-minus"></i></button>
+              <button id='break-increment' onClick={this.breakIncrement}><i className="fas fa-plus"></i></button>
+              <div id='break-length' className='text number'>{this.state.breakLength}</div>
+          </div>
+            </div>
+          <div id='session-label' className='length text'>Session Length
+            <div className='container-buttons'> 
+              <button id='session-decrement' onClick={this.sessionDecrement}><i className="fas fa-minus"></i></button>
+              <button id='session-increment' onClick={this.sessionIncrement}><i className="fas fa-plus"></i></button>
+              <div id='session-length' className='text number'>{this.state.sessionLength}</div>
+          </div>
+            </div>
+        </div>
+        <div id='clock'>
+          <div id='timer-label' className='text'>{this.state.session ? 'Session' : 'Break'}</div>
+          <div id='time-left'>{showTime}</div>
+          <div id='controls'>
+            <button id='start_stop' onClick={this.handleStartStop} style={{margin: 10}}>{!this.state.start ? <i className="fas fa-play"></i> : <i className="fas fa-pause"></i>}</button>
+            <button id='reset' onClick={this.handleReset} style={{margin: 10}}><i className="fas fa-sync-alt"></i></button>
+          </div>
+        </div>
+        <audio id='beep' src='https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3'></audio>
+        <div id='credits'>Designed and Coded by<br/><a href='https://github.com/yoelvisj/' target='_blank'>Yoelvis Jiménez</a></div>
+      </div>);
+  }
+}
+
+ReactDOM.render(<PomodoroClock/>, document.getElementById('root'));
